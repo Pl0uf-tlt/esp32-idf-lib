@@ -1,6 +1,10 @@
+# **This README isn't up to date, it wwill be sooon but ain't for now** 
+
+It can still provide usefull informatios but it's not finished yet 
+
 # Driver for **SHT3x** digital **temperature and humidity sensor**
 
-The driver is for the usage with the ESP32 and ESP-IDF
+The driver is for the usage with the ESP32 and ESP-IDF 
 
 ## About this driver
 
