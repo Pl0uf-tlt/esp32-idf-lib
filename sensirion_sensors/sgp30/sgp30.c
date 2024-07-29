@@ -110,11 +110,11 @@ esp_err_t sgp30_compute_values(sgp30_data_t data, uint16_t *tvoc, uint16_t *co2)
 {
     CHECK_ARG(data && (tvoc || co2));
 
-    if (tvoc)
-        *tvoc = ((data[0] * 256.0) + data[1]);
-
     if (co2)
-        *co2 = ((data[3] * 256.0) + data[4]);
+        *co2 = ((data[0] * 256.0) + data[1]);
+
+    if (tvoc)
+        *tvoc = ((data[3] * 256.0) + data[4]);
 
     return ESP_OK;
 }
