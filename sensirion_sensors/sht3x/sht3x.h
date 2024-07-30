@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2017 Gunar Schorcht <https://github.com/gschorcht>
- * Copyright (c) 2019 Ruslan V. Uss <unclerus@gmail.com>
  * Copyright (c) 2024 Cédric Toulotte <https://github.com/Pl0uf-tlt>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +32,6 @@
  *
  * ESP-IDF driver for Sensirion SHT3x digital temperature and humidity sensor
  *
- * Copyright (c) 2017 Gunar Schorcht <https://github.com/gschorcht>\n
- * Copyright (c) 2019 Ruslan V. Uss <unclerus@gmail.com>
  * Copyright (c) 2024 Cédric Toulotte <https://github.com/Pl0uf-tlt>
  *
  * BSD Licensed as described in the file LICENSE
@@ -88,9 +84,9 @@ typedef struct
     i2c_master_dev_handle_t *sht_dev_handle; //!< sht's i2c device handle
 
     sht3x_raw_data_t raw_data;
+    sht3x_status_t status;
     float temperature;
     float humidity;
-    sht3x_status_t status;
 
     sht3x_mode_t mode;            //!< used measurement mode
     sht3x_repeat_t repeatability; //!< used repeatability
@@ -118,50 +114,31 @@ esp_err_t sht3x_init_desc(sht3x_t *dev, i2c_master_bus_handle_t *bus_handle, i2c
 esp_err_t sht3x_init(sht3x_t *dev);
 
 /**
- * @brief Start the measurement in single shot or periodic mode with a chosen repeatability
+ * @brief Starts the measurement in single shot with a chosen repeatability and stores the resulting raw data in the device descriptor
  * 
- * The function starts the measurement either in *single shot mode*
- * (exactly one measurement) or *periodic mode* (periodic measurements)
- * with given repeatability.
+ * The function starts the measurement in *single shot mode*
+ * (exactly one measurement) with given repeatability.
  * 
- * In the *single shot mode*, this function has to be called for each
- * measurement. The measurement duration has to be waited every time
- * before the results can be fetched.
+ * This function has to be called for each measurement. 
  *               
- * In the *periodic mode*, this function has to be called only once. Also
- * the measurement duration has to be waited only once until the first
- * results are available. After this first measurement, the sensor then
- * automatically performs all subsequent measurements. The rate of periodic
- * measurements can be 10, 4, 2, 1 or 0.5 measurements per second (mps).
- * 
- * @note Due to inaccuracies in timing of the sensor, the user task
- *       should fetch the results at a lower rate. The rate of the periodic
- *       measurements is defined by the parameter \p mode.
  * 
  * @note Thread safe
  *
  * @param dev    A pointer to the sht3x device descriptor 
- * @param mode   The measurement mode of the measure, see type ::sht3x_mode_t
  * @param repeat The repeatability mode of the measure, see type ::sht3x_repeat_t
  * 
- * @return       ESP_OK on success
+ * @return       ESP_OK on success - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid.ESP_ERR_INVALID_ARG: dev doesn't exist - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
  */
 esp_err_t sht3x_start_measurement_single_shot(sht3x_t *dev, sht3x_repeat_t repeat);
 
 /**
- * @brief Start the measurement in single shot or periodic mode with a chosen repeatability
+ * @brief Start the measurement in periodic mode with a chosen repeatability
  * 
- * The function starts the measurement either in *single shot mode*
- * (exactly one measurement) or *periodic mode* (periodic measurements)
- * with given repeatability.
+ * The function starts the measurement in *single shot mode*
+ * (exactly one measurement) with given repeatability.
  * 
- * In the *single shot mode*, this function has to be called for each
- * measurement. The measurement duration has to be waited every time
- * before the results can be fetched.
  *               
- * In the *periodic mode*, this function has to be called only once. Also
- * the measurement duration has to be waited only once until the first
- * results are available. After this first measurement, the sensor then
+ * This function has to be called only once. The sensor
  * automatically performs all subsequent measurements. The rate of periodic
  * measurements can be 10, 4, 2, 1 or 0.5 measurements per second (mps).
  * 
@@ -175,7 +152,7 @@ esp_err_t sht3x_start_measurement_single_shot(sht3x_t *dev, sht3x_repeat_t repea
  * @param mode   The measurement mode of the measure, see type ::sht3x_mode_t
  * @param repeat The repeatability mode of the measure, see type ::sht3x_repeat_t
  * 
- * @return       ESP_OK on success
+ * @return       ESP_OK on success - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid.ESP_ERR_INVALID_ARG: dev doesn't exist - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
  */
 esp_err_t sht3x_start_periodic_measurement(sht3x_t *dev, sht3x_mode_t mode, sht3x_repeat_t repeat);
 
@@ -183,21 +160,20 @@ esp_err_t sht3x_start_periodic_measurement(sht3x_t *dev, sht3x_mode_t mode, sht3
  * @brief Read measurement results from sensor as raw data
  *
  * The function read measurement results from the sensor, checks the CRC
- * checksum and stores them in the byte array as following as unsigned byte integers.
+ * checksum and stores them in a byte array in the device desscriptor as indicated bellow as unsigned byte integers  
  *
  *      data[0] = Temperature MSB
  *      data[1] = Temperature LSB
  *      data[2] = Temperature CRC
  *      data[3] = Humidity MSB
  *      data[4] = Humidity LSB
- *      data[2] = Humidity CRC
+ *      data[5] = Humidity CRC
  *
  * In case that there are no new data that can be read, the function fails.
  *
  * @note Thread safe
  * 
  * @param dev      A pointer to the sht3x device descriptor
- * @param raw_data Byte array in which raw data are stored as unsigned integers
  *
  * @return         ESP_OK on success - ESP_ERR_INVALID_CRC if the crc failed - ESP_ERR_INVALID_STATE if measurement isn't started or is still running
  */
@@ -218,7 +194,7 @@ esp_err_t sht3x_set_heater(sht3x_t *dev, bool enable);
 /**
  * @brief Computes the real value of temperature and/or humidity from the raw data
  * 
- * @param raw_data    The raw_data coming from the sensor as an 8 bits unsigned integers array
+ * @param raw_data    The raw_data coming from the sensor as a bytes unsigned integers array
  * @param temperature A pointer to a float in wich will be stock the temperature in °C
  * @param humidity    A pointer to a float in wich will be stock the relative humidity in %
  * 
@@ -229,27 +205,21 @@ esp_err_t sht3x_compute_values(sht3x_raw_data_t raw_data, float *temperature, fl
 /**
  * @brief High level measurement function
  *
- * For convenience this function comprises all three steps to perform
+ * For convenience this function comprises both steps to perform
  * one measurement in only one function:
  *
  * 1. Starts a measurement in single shot mode with high reliability
- * 2. Waits using `vTaskDelay()` until measurement results are available
- * 3. Returns the results in kind of floating point sensor values
+ * 2. Returns the results in kind of floating point sensor values
  *
  * This function is the easiest way to use the sensor. It is most suitable
  * for users that don't want to have the control on sensor details.
  *
- * @note The function delays the calling task up to 30 ms to wait for
- *       the measurement results. This might lead to problems when function
- *       is called from a software timer callback function.
  * 
  * @note Thread safe
  *
- * @param dev         A pointer to the sht3x device descriptor 
- * @param temperature A pointer to a float in wich will be stock the temperature in °C
- * @param humidity    A pointer to a float in wich will be stock the relative humidity in %
+ * @param dev A pointer to the sht3x device descriptor 
  * 
- * @return            ESP_OK on success - ESP_ERR_INVALID_ARG if dev and/or both temperature and humidity don't exists
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
  */
 esp_err_t sht3x_measure(sht3x_t *dev);
 
@@ -257,7 +227,7 @@ esp_err_t sht3x_measure(sht3x_t *dev);
  * @brief Stops the periodic mode measurements
  *
  * The function stops the measurements  in *periodic mode*
- * (periodic measurements) and the sensor returns in *single shot mode*
+ * (periodic measurements)
  *
  * @note Thread safe
  * 
@@ -268,25 +238,41 @@ esp_err_t sht3x_measure(sht3x_t *dev);
 esp_err_t sht3x_stop_periodic_measurement(sht3x_t *dev);
 
 /**
- * @brief Compute the real value of temperature and/or humidity from the raw data
+ * @brief Gets and computes the real value of temperature and/or humidity from the sensor
  *
- * The function combines function ::sht3x_get_raw_data() and function
+ * The function combines function ::sht3x_fetch_data() and function
  * ::sht3x_compute_values() to get the measurement results.
  *
  * In case that there are no results that can be read, the function fails.
  * 
  * @note Thread safe
  * 
- * @param dev         A pointer to the sht3x device descriptor
- * @param temperature A pointer to a float in wich will be stock the temperature in °C
- * @param humidity    A pointer to a float in wich will be stock the relative humidity in %
+ * @param dev A pointer to the sht3x device descriptor
  * 
- * @return            ESP_OK on success - ESP_ERR_INVALID_ARG if both temperature and humidity don't exists
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
  */
 esp_err_t sht3x_get_results(sht3x_t *dev);
 
+/**
+ * @brief Reset the sensor in single shot mode with high repeatability and reload the calibration data. Needs to be in idle mode 
+ *
+ * @note Thread safe
+ * 
+ * @param dev A pointer to the sht3x device descriptor
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
 esp_err_t sht3x_reset(sht3x_t *dev);
 
+/**
+ * @brief Read the status bytes of the sht3x
+ *
+ * @note Thread safe
+ * 
+ * @param dev A pointer to the sht3x device descriptor
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
 esp_err_t sht3x_read_status(sht3x_t *dev);
 
 #endif /* __SHT3X_H__ */

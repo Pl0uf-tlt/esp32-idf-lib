@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2017 Gunar Schorcht <https://github.com/gschorcht>
- * Copyright (c) 2019 Ruslan V. Uss <unclerus@gmail.com>
  * Copyright (c) 2024 Cédric Toulotte <https://github.com/Pl0uf-tlt>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +30,6 @@
  *
  * ESP-IDF driver for Sensirion SHT3x digital temperature and humidity sensor
  *
- * Copyright (c) 2017 Gunar Schorcht <https://github.com/gschorcht>\n
- * Copyright (c) 2019 Ruslan V. Uss <unclerus@gmail.com>
  * Copyright (c) 2024 Cédric Toulotte <https://github.com/Pl0uf-tlt>
  *
  * BSD Licensed as described in the file LICENSE
