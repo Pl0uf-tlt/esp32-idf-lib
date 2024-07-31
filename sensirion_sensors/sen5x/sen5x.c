@@ -70,7 +70,6 @@ esp_err_t sen5x_init_desc(sen5x_t *dev, i2c_master_bus_handle_t *bus_handle, i2c
 esp_err_t sen5x_init(sen5x_t *dev)
 {
     CHECK_ARG(dev);
-    ESP_LOGI("sen5x", "initialisation");
     
     CHECK(sen5x_read_serial_number(dev, &(dev->serial_number)));
     CHECK(sen5x_read_firmware_version(dev, &(dev->firmware_version)));
@@ -102,20 +101,20 @@ esp_err_t sen5x_stop_measurement(sen5x_t *dev)
     return ESP_OK;
 }
 
-esp_err_t sen5x_read_data_ready_flag(sen5x_t *dev, sen5x_data_ready_flag_t *data_ready_flag) 
+esp_err_t sen5x_read_data_ready_flag(sen5x_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_DATA_READY_FLAG, 2, 20, *data_ready_flag, sizeof(sen5x_data_ready_flag_t)));
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_DATA_READY_FLAG, 2, 20, &(dev->data_ready_flag), sizeof(sen5x_data_ready_flag_t)));
 
     return ESP_OK;
 }
 
-esp_err_t sen5x_read_measured_values(sen5x_t *dev, sen5x_measured_values_t *measured_values) 
+esp_err_t sen5x_read_measured_values(sen5x_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_MEASURED_VALUES, 2, 20, *measured_values, sizeof(sen5x_measured_values_t)));
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_MEASURED_VALUES, 2, 20, &(dev->measured_values), sizeof(sen5x_measured_values_t)));
 
     dev->pm1p0 = ((double)(dev->measured_values[0]*256 + dev->measured_values[1]))/10;
     dev->pm2p5 = ((double)(dev->measured_values[3]*256 + dev->measured_values[4]))/10;
@@ -188,38 +187,38 @@ esp_err_t sen5x_write_auto_cleaning_interval(sen5x_t *dev, sen5x_fan_auto_cleani
     return ESP_OK;
 }
 
-esp_err_t sen5x_read_product_name(sen5x_t *dev, sen5x_product_name_t *product_name) 
+esp_err_t sen5x_read_product_name(sen5x_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_PRODUCT_NAME, 2, 20, *product_name, sizeof(sen5x_product_name_t)));
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_PRODUCT_NAME, 2, 20, &(dev->product_name), sizeof(sen5x_product_name_t)));
 
     return ESP_OK;
 }
 
-esp_err_t sen5x_read_serial_number(sen5x_t *dev, sen5x_serial_number_t *serial_number) 
+esp_err_t sen5x_read_serial_number(sen5x_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_SERIAL_NUMBER, 2, 20, *serial_number, sizeof(sen5x_serial_number_t)));
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_SERIAL_NUMBER, 2, 20, &(dev->serial_number), sizeof(sen5x_serial_number_t)));
 
     return ESP_OK;
 }
 
-esp_err_t sen5x_read_firmware_version(sen5x_t *dev, sen5x_firmware_version_t *firmware_version) 
+esp_err_t sen5x_read_firmware_version(sen5x_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_FIRMWARE_VERSION, 2, 20, *firmware_version, sizeof(sen5x_firmware_version_t)));
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_FIRMWARE_VERSION, 2, 20, &(dev->firmware_version) , sizeof(sen5x_firmware_version_t)));
 
     return ESP_OK;
 }
 
-esp_err_t sen5x_read_device_status(sen5x_t *dev, sen5x_device_status_t *device_status) 
+esp_err_t sen5x_read_device_status(sen5x_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_DEVICE_STATUS, 2, 20, *device_status, sizeof(sen5x_device_status_t)));
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_DEVICE_STATUS, 2, 20, &(dev->device_status), sizeof(sen5x_device_status_t)));
 
     return ESP_OK;
 }

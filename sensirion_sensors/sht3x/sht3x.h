@@ -134,9 +134,6 @@ esp_err_t sht3x_start_measurement_single_shot(sht3x_t *dev, sht3x_repeat_t repea
 /**
  * @brief Start the measurement in periodic mode with a chosen repeatability
  * 
- * The function starts the measurement in *single shot mode*
- * (exactly one measurement) with given repeatability.
- * 
  *               
  * This function has to be called only once. The sensor
  * automatically performs all subsequent measurements. The rate of periodic
@@ -152,7 +149,7 @@ esp_err_t sht3x_start_measurement_single_shot(sht3x_t *dev, sht3x_repeat_t repea
  * @param mode   The measurement mode of the measure, see type ::sht3x_mode_t
  * @param repeat The repeatability mode of the measure, see type ::sht3x_repeat_t
  * 
- * @return       ESP_OK on success - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid.ESP_ERR_INVALID_ARG: dev doesn't exist - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
+ * @return       ESP_OK on success - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid. - ESP_ERR_INVALID_ARG: dev doesn't exist - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
  */
 esp_err_t sht3x_start_periodic_measurement(sht3x_t *dev, sht3x_mode_t mode, sht3x_repeat_t repeat);
 
@@ -160,7 +157,8 @@ esp_err_t sht3x_start_periodic_measurement(sht3x_t *dev, sht3x_mode_t mode, sht3
  * @brief Read measurement results from sensor as raw data
  *
  * The function read measurement results from the sensor, checks the CRC
- * checksum and stores them in a byte array in the device desscriptor as indicated bellow as unsigned byte integers  
+ * checksum and stores them in a byte array in the device descriptor as 
+ * indicated bellow as unsigned byte integers  
  *
  *      data[0] = Temperature MSB
  *      data[1] = Temperature LSB

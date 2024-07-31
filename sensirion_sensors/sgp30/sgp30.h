@@ -77,15 +77,52 @@ typedef struct
     uint16_t co2;
 } sgp30_t;
 
-esp_err_t sgp30_measure(sgp30_t *dev, uint16_t *tvoc, uint16_t *co2);
+/**
+ * @brief Sends the command to performe a measure, wait and fetch the results, 
+ * compute the actual values of tvoc and co2 and stores them in the device descriptor. 
+ *
+ * This function is the easiest way to use the sensor. It is most suitable
+ * for users that don't want to have the control on sensor details.
+ *
+ * 
+ * @note Thread safe
+ *
+ * @param dev A pointer to the sgp30 device descriptor 
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
+esp_err_t sgp30_measure(sgp30_t *dev);
 
-esp_err_t sgp30_get_raw_data(sgp30_t *dev, sgp30_raw_data_t raw_data);
-
+/**
+ * @brief Initializes the sgp30 device descriptor 
+ * 
+ * @param dev        A pointer to the sgp30 device descriptor 
+ * @param bus_handle A pointer to the i2c master bus handle
+ * @param sgp30_handle A pointer to the sgp30's i2c device handle
+ * 
+ * @return ESP_OK on success - ESP_ERR_INVALID_ARG if sgp_handle or bus_handle doesn't exist
+ */
 esp_err_t sgp30_init_desc(sgp30_t *dev, i2c_master_bus_handle_t *bus_handle, i2c_master_dev_handle_t *sgp30_handle);
 
+/**
+ * @brief Initializes the state of the sgp30 sensor
+ * 
+ * @param dev A pointer to the sgp30 device descriptor 
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
 esp_err_t sgp30_init(sgp30_t *dev);
 
-esp_err_t sgp30_compute_values(sgp30_data_t data, uint16_t *tvoc, uint16_t *co2);
+/**
+ * @brief Computes the real value of co2 and/or tvoc from the data received from the sensor
+ * 
+ * @param raw_data The raw_data coming from the sensor as a bytes unsigned integers array
+ * @param co2      A pointer to a float in wich will be stock the temperature in °C
+ * @param tvoc     A pointer to a float in wich will be stock the relative humidity in %
+ * 
+ * @return         ESP_OK on success - ESP_ERR_INVALID_ARG if raw_data and/or both temperature and humidity don't exists
+ */
+esp_err_t sgp30_compute_values(sgp30_data_t data, uint16_t *co2, uint16_t *tvoc);
 
 /**
  * @brief Gets the IAQ algorithme baseline to stock for future usage
@@ -93,11 +130,10 @@ esp_err_t sgp30_compute_values(sgp30_data_t data, uint16_t *tvoc, uint16_t *co2)
  * @note Thread safe
  * 
  * @param dev A pointer to the sgp30 device descriptor 
- * @param iaq_bl An array of 16 bits unsigned integers that represents the baseline for IAQ algorithme
  * 
- * @return ESP_OK if success - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid. - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
+ * @return ESP_OK if success - - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid. - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
  */
-esp_err_t sgp30_get_iaq_baseline(sgp30_t *dev, sgp30_iaq_baseline_t iaq_bl);
+esp_err_t sgp30_get_iaq_baseline(sgp30_t *dev);
 
 /**
  * @brief Sets the IAQ algorithme baseline. The command sgp30_iaq_init(dev) must have been sent before the use of sgp30_set_iaq_baseline(dev, iaq_bl)
@@ -123,16 +159,83 @@ esp_err_t sgp30_set_IAQ_baseline(sgp30_t *dev, sgp30_iaq_baseline_t iaq_bl);
  */
 esp_err_t sgp30_set_humidity(sgp30_t *dev, uint32_t absolute_humidity);
 
+/**
+ * @brief Makes the sensor perform a self test. In case of a successful self-test 
+ * the sensor returns the fixed data pattern 0xD400 (with correct CRC).
+ * 
+ * @param dev A pointer to the sgp30 device descriptor 
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
 esp_err_t sgp30_measure_test(sgp30_t *dev);
 
-esp_err_t sgp30_get_feature_set(sgp30_t *dev, sgp30_feature_set_t feature_set); 
+/**
+ * @brief Read the feature set of the sensor and stores it in the device descriptor
+ *
+ * @note Thread safe
+ * 
+ * @param dev A pointer to the sgp30 device descriptor
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
+esp_err_t sgp30_get_feature_set(sgp30_t *dev); 
 
-esp_err_t sgp30_measure_raw(sgp30_t *dev, sgp30_raw_data_t raw_data);
+/**
+ * @brief Read measurement results from sensor as raw data
+ *
+ * The function read measurement results from the sensor, checks the CRC
+ * checksum and stores them in a byte array in the device desscriptor as 
+ * indicated bellow as unsigned byte integers  
+ *
+ *      data[0] = CO2 MSB
+ *      data[1] = CO2 LSB
+ *      data[2] = CO2 CRC
+ *      data[3] = TVOC MSB
+ *      data[4] = TVOC LSB
+ *      data[5] = TVOC CRC
+ *
+ * In case that there are no new data that can be read, the function fails.
+ *
+ * @note Thread safe
+ * 
+ * @param dev      A pointer to the sgp30 device descriptor
+ *
+ * @return         ESP_OK on success - ESP_ERR_INVALID_CRC if the crc failed - ESP_ERR_INVALID_STATE if measurement isn't started or is still running
+ */
+esp_err_t sgp30_measure_raw(sgp30_t *dev);
 
-esp_err_t sgp30_get_tvoc_inceptive_baseline(sgp30_t *dev, sgp30_tvoc_baseline_t tvoc_baseline);
+/**
+ * @brief Gets the tvoc inceptive baseline to stock for future usage
+ * 
+ * @note Thread safe
+ * 
+ * @param dev A pointer to the sgp30 device descriptor 
+ * 
+ * @return ESP_OK if success - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid. - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
+ */
+esp_err_t sgp30_get_tvoc_inceptive_baseline(sgp30_t *dev);
 
+/**
+ * @brief Sets the tvoc inceptive baseline
+ * 
+ * @note Thread safe
+ * 
+ * @param dev A pointer to the sgp30 device descriptor 
+ * @param tvoc_baseline An array of 16 bits unsigned integers that represents the baseline for tvoc inceptive algorithme
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALIG_ARG if dev and/or tvoc_baseline don't exist - ESP_ERR_INVALID_ARG: I2C master transmit parameter invalid. - ESP_ERR_TIMEOUT: Operation timeout(larger than xfer_timeout_ms) because the bus is busy or hardware crash
+ */
 esp_err_t sgp30_set_tvoc_inceptive_baseline(sgp30_t *dev, sgp30_tvoc_baseline_t tvoc_baseline);
 
-esp_err_t sgp30_get_serial_id(sgp30_t *dev, sgp30_serial_id_t serial_id);
+/**
+ * @brief Read the feature set of the sensor and stores it in the device descriptor
+ *
+ * @note Thread safe
+ * 
+ * @param dev A pointer to the sgp30 device descriptor
+ * 
+ * @return    ESP_OK on success - ESP_ERR_INVALID_ARG if dev doesn't exist
+ */
+esp_err_t sgp30_get_serial_id(sgp30_t *dev);
 
 #endif /* __SGP30_H__ */

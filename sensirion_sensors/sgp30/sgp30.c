@@ -53,22 +53,12 @@ static uint8_t SGP30_GET_TVOC_INCEPTIVE_BASELINE[2] = { 0x20, 0xB3 };
 static uint8_t SGP30_SET_TVOC_INCEPTIVE_BASELINE[2] = { 0x20, 0x77 };
 static uint8_t SGP30_GET_SERIAL_ID[2] =               { 0x36, 0x82 };
 
-esp_err_t sgp30_measure(sgp30_t *dev, uint16_t *tvoc, uint16_t *co2)
-{
-    sgp30_data_t data;
-    CHECK_ARG(dev);
-
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_MEASURE_IAQ, 2, 20, data, sizeof(sgp30_data_t)));
-    CHECK(sgp30_compute_values(data, tvoc, co2));
-
-    return ESP_OK;
-}
-
-esp_err_t sgp30_get_raw_data(sgp30_t *dev, sgp30_raw_data_t raw_data)
+esp_err_t sgp30_measure(sgp30_t *dev)
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_MEASURE_RAW, 2, 25, raw_data, sizeof(sgp30_raw_data_t)));
+    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_MEASURE_IAQ, 2, 20, dev->data, sizeof(sgp30_data_t)));
+    CHECK(sgp30_compute_values(dev->data, &(dev->tvoc), &(dev->co2)));
 
     return ESP_OK;
 }
@@ -86,17 +76,10 @@ esp_err_t sgp30_init_desc(sgp30_t *dev, i2c_master_bus_handle_t *bus_handle, i2c
 esp_err_t sgp30_init(sgp30_t *dev)
 {
     CHECK_ARG(dev);
-    ESP_LOGI("sgp30", "initialisation");
     
     CHECK(execute_command(dev->sgp30_dev_handle, SGP30_IAQ_INIT, 2, 10, NULL , 0));
-    ESP_LOGI("sgp30", "initialisation terminée");
-    
-    ESP_LOGI("sgp30", "Serial id");
     CHECK(sgp30_get_serial_id(dev, dev->serial_id));
-    ESP_LOGI("sgp30", "Serial id terminée");
-    ESP_LOGI("sgp30", "Feature set");
     CHECK(sgp30_get_feature_set(dev, dev->feature_set));
-    ESP_LOGI("sgp30", "Feature set terminée");
     ESP_LOGI("sgp30", "Serial Number: %02x %02x %02x", dev->serial_id[0],
                                 dev->serial_id[1], dev->serial_id[2]);
 
@@ -119,11 +102,11 @@ esp_err_t sgp30_compute_values(sgp30_data_t data, uint16_t *tvoc, uint16_t *co2)
     return ESP_OK;
 }
 
-esp_err_t sgp30_get_iaq_baseline(sgp30_t *dev, sgp30_iaq_baseline_t iaq_bl)
+esp_err_t sgp30_get_iaq_baseline(sgp30_t *dev)
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_IAQ_BASELINE, 2, 10, iaq_bl, sizeof(sgp30_iaq_baseline_t)));
+    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_IAQ_BASELINE, 2, 10, dev->iaq_baseline, sizeof(sgp30_iaq_baseline_t)));
 
     return ESP_OK;
 }
@@ -195,29 +178,29 @@ esp_err_t sgp30_measure_test(sgp30_t *dev)
     return ESP_OK;
 }
 
-esp_err_t sgp30_get_feature_set(sgp30_t *dev, sgp30_feature_set_t feature_set) 
+esp_err_t sgp30_get_feature_set(sgp30_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_FEATURE_SET, 2, 10, feature_set, sizeof(sgp30_feature_set_t)));
+    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_FEATURE_SET, 2, 10, dev->feature_set, sizeof(sgp30_feature_set_t)));
 
     return ESP_OK;
 }
 
-esp_err_t sgp30_measure_raw(sgp30_t *dev, sgp30_raw_data_t raw_data) 
+esp_err_t sgp30_measure_raw(sgp30_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_MEASURE_RAW, 2, 25, raw_data, sizeof(sgp30_raw_data_t)));
+    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_MEASURE_RAW, 2, 25, dev->raw_data, sizeof(sgp30_raw_data_t)));
 
     return ESP_OK;
 }
 
-esp_err_t sgp30_get_tvoc_inceptive_baseline(sgp30_t *dev, sgp30_tvoc_baseline_t tvoc_baseline) 
+esp_err_t sgp30_get_tvoc_inceptive_baseline(sgp30_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_TVOC_INCEPTIVE_BASELINE, 2, 10, tvoc_baseline, sizeof(sgp30_tvoc_baseline_t)));
+    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_TVOC_INCEPTIVE_BASELINE, 2, 10, dev->tvoc_baseline, sizeof(sgp30_tvoc_baseline_t)));
     
     return ESP_OK;
 }
@@ -240,11 +223,11 @@ esp_err_t sgp30_set_tvoc_inceptive_baseline(sgp30_t *dev, sgp30_tvoc_baseline_t 
     return ESP_OK;
 }
 
-esp_err_t sgp30_get_serial_id(sgp30_t *dev, sgp30_serial_id_t serial_id) 
+esp_err_t sgp30_get_serial_id(sgp30_t *dev) 
 {
     CHECK_ARG(dev);
 
-    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_SERIAL_ID, 2, 10, serial_id, sizeof(sgp30_serial_id_t)));
+    CHECK(execute_command(dev->sgp30_dev_handle, SGP30_GET_SERIAL_ID, 2, 10, dev->serial_id, sizeof(sgp30_serial_id_t)));
     
     return ESP_OK;
 }
