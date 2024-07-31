@@ -8,6 +8,8 @@ This driver is based on [the version](https://github.com/UncleRus/esp-idf-lib/sh
 
 This driver has only been tested on **ESP32-H2** with **esp-idf v5.2.2**. I can't affirm that it will neither work or won't work with other version of esp-idf or with other soc.
 
+This driver is based on this (datasheet)[https://sensirion.com/media/documents/213E6A3B/63A5A569/Datasheet_SHT3x_DIS.pdf] that one can find on (the product page)[https://sensirion.com/products/catalog/SHT30-DIS-B].
+
 ## About the sensor
 
 SHT3x is a digital temperature and humidity sensor that uses an I2C interface with up to 400kHz communication speed. It can operate with **three levels of repeatability** (low, medium and high) and in two different modes, the **single shot data acquisition mode** (or short **single shot mode**) and the **periodic data acquisition mode** (or short **periodic mode**).

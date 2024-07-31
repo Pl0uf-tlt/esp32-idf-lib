@@ -30,7 +30,7 @@
  * @defgroup sensirion_sensors sensirion_sensors
  * 
  *
- * ESP-IDF driver for Sensirion's sensors, it works att least with sht3x, sgp30 and sen5x sensors
+ * ESP-IDF driver for Sensirion's sensors, it works at least with sht3x, sgp30 and sen5x sensors
  *
  * Copyright (c) 2024 Cédric Toulotte <https://github.com/Pl0uf-tlt>
  *

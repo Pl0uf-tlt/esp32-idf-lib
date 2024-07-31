@@ -8,9 +8,13 @@ This driver is based upon a (driver for the sgp30)[https://github.com/co-env/esp
 
 This driver has only been tested on **ESP32-H2** with **esp-idf v5.2.2**. I can't affirm that it will neither work or won't work with other version of esp-idf or with other soc.
 
+This driver is based on this (datasheet)[https://sensirion.com/media/documents/984E0DD5/61644B8B/Sensirion_Gas_Sensors_Datasheet_SGP30.pdf] that one can find on (the product page)[https://sensirion.com/products/catalog/SGP30].
+
 ## About the sensor
 
-SGP30 is a digital air quality sensor that mesures H2 and ethanol concentration in the aire to determine the concentration oof total volatile organic compound (TVOC) and CO2. It uses an I2C interface with up to 400kHz communication speed. 
+SGP30 is a digital air quality sensor that mesures H2 and ethanol concentration in the aire to determine the concentration of total volatile organic compound (TVOC) and CO2. It uses an I2C interface with up to 400kHz communication speed. 
+
+This sensor has been replaced by the sgp40 and is now obsolete.
 
 ## Measurement process
 

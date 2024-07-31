@@ -8,6 +8,8 @@ This driver uses the native i2c_master library. It has been made with the same l
 
 This driver has only been tested on **ESP32-H2** with **esp-idf v5.2.2**. I can't affirm that it will neither work or won't work with other version of esp-idf or with other soc.
 
+This driver is based on this (datasheet)[https://sensirion.com/media/documents/6791EFA0/62A1F68F/Sensirion_Datasheet_Environmental_Node_SEN5x.pdf] that one can find on (the product page)[https://sensirion.com/products/catalog/SEN50].
+
 ## About the sensor
 
 SEN5X is a digital air quality sensor that measures particulate matter, VOC, NOx, humidity, and temperature. There are 3 types of SEN5X, the SEN50, the SEN54 and the SEN55. This driver isn't complete, it lacks fonctions oriented toward VOC, NOCx and RH/T. It is meant for SEN50 only.
