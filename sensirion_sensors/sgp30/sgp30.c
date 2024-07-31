@@ -78,8 +78,8 @@ esp_err_t sgp30_init(sgp30_t *dev)
     CHECK_ARG(dev);
     
     CHECK(execute_command(dev->sgp30_dev_handle, SGP30_IAQ_INIT, 2, 10, NULL , 0));
-    CHECK(sgp30_get_serial_id(dev, dev->serial_id));
-    CHECK(sgp30_get_feature_set(dev, dev->feature_set));
+    CHECK(sgp30_get_serial_id(dev));
+    CHECK(sgp30_get_feature_set(dev));
     ESP_LOGI("sgp30", "Serial Number: %02x %02x %02x", dev->serial_id[0],
                                 dev->serial_id[1], dev->serial_id[2]);
 
