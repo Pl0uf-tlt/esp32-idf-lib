@@ -56,6 +56,26 @@ static uint8_t SEN5X_READ_FIRMWARE_VERSION[2] =                          { 0xD1,
 static uint8_t SEN5X_READ_DEVICE_STATUS[2] =                             { 0xD2, 0x06 };
 static uint8_t SEN5X_CLEAR_DEVICE_STATUS[2] =                            { 0xD2, 0x10 };
 static uint8_t SEN5X_DEVICE_RESET[2] =                                   { 0xD3, 0x04 };
+static uint8_t SEN5X_READ_PM_VALUES[2] =                                 { 0x04, 0x13 };
+
+esp_err_t sen5x_read_pm_values(sen5x_t *dev) 
+{
+    CHECK_ARG(dev);
+
+    CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_PM_VALUES, 2, 20, dev->measured_pm_values, sizeof(sen5x_measured_pm_values_t)));
+    dev->pm1p0 = ((double)(dev->measured_pm_values[0]*256 + dev->measured_pm_values[1]))/10;
+    dev->pm2p5 = ((double)(dev->measured_pm_values[3]*256 + dev->measured_pm_values[4]))/10;
+    dev->pm4p0 = ((double)(dev->measured_pm_values[6]*256 + dev->measured_pm_values[7]))/10;
+    dev->pm10p0 = ((double)(dev->measured_pm_values[9]*256 + dev->measured_pm_values[10]))/10;
+    dev->pm0p5_nbr = ((double)(dev->measured_pm_values[12]*256 + dev->measured_pm_values[13]))/10;
+    dev->pm1p0_nbr = ((double)(dev->measured_pm_values[15]*256 + dev->measured_pm_values[16]))/10;
+    dev->pm2p5_nbr = ((double)(dev->measured_pm_values[18]*256 + dev->measured_pm_values[19]))/10;
+    dev->pm4p0_nbr = ((double)(dev->measured_pm_values[21]*256 + dev->measured_pm_values[22]))/10;
+    dev->pm10p0_nbr = ((double)(dev->measured_pm_values[24]*256 + dev->measured_pm_values[25]))/10;
+    dev->typical_particul_size = ((double)(dev->measured_pm_values[27]*256 + dev->measured_pm_values[28]))/100;
+    return ESP_OK;
+}
+
 
 esp_err_t sen5x_init_desc(sen5x_t *dev, i2c_master_bus_handle_t *bus_handle, i2c_master_dev_handle_t *sen5x_handle)
 {
@@ -115,7 +135,6 @@ esp_err_t sen5x_read_measured_values(sen5x_t *dev)
     CHECK_ARG(dev);
 
     CHECK(execute_command(dev->sen5x_dev_handle, SEN5X_READ_MEASURED_VALUES, 2, 20, dev->measured_values, sizeof(sen5x_measured_values_t)));
-
     dev->pm1p0 = ((double)(dev->measured_values[0]*256 + dev->measured_values[1]))/10;
     dev->pm2p5 = ((double)(dev->measured_values[3]*256 + dev->measured_values[4]))/10;
     dev->pm4p0 = ((double)(dev->measured_values[6]*256 + dev->measured_values[7]))/10;

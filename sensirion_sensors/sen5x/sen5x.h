@@ -55,6 +55,7 @@
 #define SEN5X_SERIAL_NUMBER_SIZE 48
 #define SEN5X_FIRMWARE_VERSION_SIZE 3
 #define SEN5X_DEVICE_STATUS_SIZE 6
+#define SEN5X_MEASURED_PM_VALUES_SIZE 30
 
 typedef uint8_t sen5x_data_ready_flag_t[SEN5X_DATA_READY_FLAG_SIZE];
 typedef uint8_t sen5x_measured_values_t[SEN5X_MEASURED_VALUES_SIZE];
@@ -65,6 +66,7 @@ typedef uint8_t sen5x_product_name_t[SEN5X_PRODUCT_NAME_SIZE];
 typedef uint8_t sen5x_serial_number_t[SEN5X_SERIAL_NUMBER_SIZE];
 typedef uint8_t sen5x_firmware_version_t[SEN5X_FIRMWARE_VERSION_SIZE];
 typedef uint8_t sen5x_device_status_t[SEN5X_DEVICE_STATUS_SIZE];
+typedef uint8_t sen5x_measured_pm_values_t[SEN5X_MEASURED_PM_VALUES_SIZE];
 
 /**
  * Device descriptor
@@ -83,11 +85,20 @@ typedef struct
     sen5x_serial_number_t serial_number;
     sen5x_firmware_version_t firmware_version;
     sen5x_device_status_t device_status;
+    sen5x_measured_pm_values_t measured_pm_values;
     double pm1p0;
     double pm2p5;
     double pm4p0;
     double pm10p0;
+    double pm1p0_nbr;
+    double pm2p5_nbr;
+    double pm4p0_nbr;
+    double pm10p0_nbr;
+    double pm0p5_nbr;
+    double typical_particul_size;
 } sen5x_t;
+
+esp_err_t sen5x_read_pm_values(sen5x_t *dev);
 
 /**
  * @brief Initializes the sen5x device descriptor 
